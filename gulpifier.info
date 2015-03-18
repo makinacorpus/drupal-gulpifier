@@ -1,3 +1,6 @@
 name = Gulpifier
 description = Drupal module to ease Gulp frontend development workflow
 core = 7.x
+
+; Our JSON map needs to be pretty to be editable
+php = 5.4

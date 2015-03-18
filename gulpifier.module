@@ -65,9 +65,14 @@ function gulpifier_js_alter(&$js) {
   // processed by our logic.
   $whitelist = gulpifier_get_whitelist($front_theme, 'js');
 
+  // Get the bundle script path.
+  $script_path = variable_get('gulpifier_js_bundle_path', $theme_path . '/dist') . '/script.min.js';
+
   // First part of the proces, discover.
   if (variable_get('gulpifier_discover', FALSE)) {
-    gulpifier_discover_js($js, $theme_path, $whitelist);
+    $map_path = variable_get('gulpifier_map_path', $theme_path . '/src') . '/map.json';
+
+    gulpifier_discover_js($js, $map_path, $script_path, $whitelist);
   }
 
   // Force every script to be in the same scope. In that way, we could render
@@ -81,7 +86,7 @@ function gulpifier_js_alter(&$js) {
   if (variable_get('gulpifier_single_js', FALSE)) {
     foreach ($js as $name => $settings) {
       // Exclude all files except for our own, and Drupal.settings
-      if ($name != 'settings' && $name != $theme_path . '/dist/script.min.js' && !in_array($name, $whitelist, TRUE)) {
+      if ($name != 'settings' && $name != $script_path && !in_array($name, $whitelist, TRUE)) {
         unset($js[$name]);
       }
       else {
@@ -94,14 +99,14 @@ function gulpifier_js_alter(&$js) {
     // In that way, all other scripts whitelist don't have to take care about
     // group and weight regarding to this global aggregate scripts which may
     // contains library.
-    $js[$theme_path . '/dist/script.min.js']['group'] = JS_LIBRARY;
-    $js[$theme_path . '/dist/script.min.js']['preprocess'] = FALSE;
-    $js[$theme_path . '/dist/script.min.js']['weight'] = -900;
+    $js[$script_path]['group'] = JS_LIBRARY;
+    $js[$script_path]['preprocess'] = FALSE;
+    $js[$script_path]['weight'] = -900;
   }
   else {
     // Remove our processed file on all requests.
-    if (isset($js[$theme_path . '/dist/script.min.js'])) {
-      unset($js[$theme_path . '/dist/script.min.js']);
+    if (isset($js[$script_path])) {
+      unset($js[$script_path]);
     }
   }
 }
@@ -130,20 +135,23 @@ function gulpifier_get_whitelist($front_theme, $type) {
 }
 
 /**
- * Populate a map.json
+ * Populate a map.json with the JS files of the current page
+ *
+ * During discovery, we will try to populate the map.json file
+ * with JS files that are included on each page of the site.
  *
  * @param $js
- * @param $theme_path
+ *  The big JS array of the current page provided by Drupal
+ * @param $map_path
+ *  The JSON map file path
+ * @param $script_path
+ *  The minified JS file path
  * @param $whitelist
- * @return array
+ *  The JS whitelist from the theme .info file
  */
-function gulpifier_discover_js(&$js, $theme_path, $whitelist) {
-  // During discovery, we will try to populate the map.json file
-  // with JS files that are included on each page of the site
-  $path = $theme_path . '/js/map.json';
-
+function gulpifier_discover_js(&$js, $map_path, $script_path, $whitelist) {
   // Load previous list
-  $contents = file_get_contents($path);
+  $contents = file_get_contents($map_path);
   $list = FALSE;
   if ($contents !== FALSE) {
     // We have a list, parse it
@@ -153,7 +161,7 @@ function gulpifier_discover_js(&$js, $theme_path, $whitelist) {
   // we will still remove our single file
 
   foreach ($js as $name => $settings) {
-    if ($name == $theme_path . '/dist/script.min.js') {
+    if ($name == $script_path) {
       // We won't need our single file here
       unset($js[$name]);
       continue;
@@ -168,7 +176,8 @@ function gulpifier_discover_js(&$js, $theme_path, $whitelist) {
   }
   // Udpate map.json
   if ($list !== FALSE && defined('JSON_PRETTY_PRINT')) {
-    file_put_contents($path, json_encode($list, JSON_PRETTY_PRINT) . "\n");
+    $json = json_encode($list, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    file_put_contents($map_path, $json . "\n");
   }
 }
 
@@ -189,12 +198,15 @@ function gulpifier_css_alter(&$css) {
   // processed by our logic.
   $whitelist = gulpifier_get_whitelist($front_theme, 'css');
 
+  // Get the bundle style path.
+  $style_path = variable_get('gulpifier_css_bundle_path', $theme_path . '/dist') . '/style.min.css';
+
   // alouette_single_css means we work in a production environment, so we analyse the
   // only need our single CSS file
   if (variable_get('gulpifier_single_css', FALSE)) {
     // Here we do a whitelist only on our file and inline CSS
     foreach ($css as $name => $settings) {
-      if ($settings['type'] == 'inline' || $name == $theme_path . '/dist/style.min.css') {
+      if ($settings['type'] == 'inline' || $name == $style_path) {
         // This will disable @import commands, better for requests
         $css[$name]['preprocess'] = FALSE;
       }
@@ -209,8 +221,8 @@ function gulpifier_css_alter(&$css) {
   }
   else {
     // Remove our processed file on all requests.
-    if (isset($js[$theme_path . '/dist/style.min.css'])) {
-      unset($js[$theme_path . '/dist/style.min.css']);
+    if (isset($css[$style_path])) {
+      unset($css[$style_path]);
     }
   }
 }
