@@ -1,0 +1,3 @@
+name = Gulpifier
+description = Drupal module to ease Gulp frontend development workflow
+core = 7.x
