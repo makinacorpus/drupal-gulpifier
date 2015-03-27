@@ -161,14 +161,27 @@ function gulpifier_discover_js(&$js, $map_path, $script_path, $whitelist) {
   // we will still remove our single file
 
   foreach ($js as $name => $settings) {
+    // Prevent some files from being processed.
     if ($name == $script_path) {
       // We won't need our single file here
       unset($js[$name]);
       continue;
     }
+    elseif ('settings' === $name) {
+      continue; // Ignore Drupal.settings.
+    }
+    elseif (FALSE !== strstr($name, 'languages/')) {
+      continue; // Ignore Drupal.t sources.
+    }
+    elseif ('external' === $settings['type']) {
+      continue; // Ignore external code.
+    }
+    elseif ('inline' === $settings['type']) {
+        continue; // Ignore inline code.
+    }
 
     // If we have a list, update it
-    if ($list !== FALSE && $name != 'settings' && !in_array($name, $whitelist, TRUE) && strstr($name, 'languages/fr') === FALSE) {
+    if ($list !== FALSE && !in_array($name, $whitelist, TRUE)) {
       // TRUE will add it, FALSE will remove it, edit the map.json file
       // directly if you need to exclude a file
       $list[$name] = isset($list[$name]) ? $list[$name] : TRUE;
@@ -206,11 +219,15 @@ function gulpifier_css_alter(&$css) {
   if (variable_get('gulpifier_single_css', FALSE)) {
     // Here we do a whitelist only on our file and inline CSS
     foreach ($css as $name => $settings) {
-      if ($settings['type'] == 'inline' || $name == $style_path) {
+      if ($style_path === $name) {
+        continue; // This is our file!
+      }
+
+      if ($settings['type'] == 'inline') {
         // This will disable @import commands, better for requests
         $css[$name]['preprocess'] = FALSE;
       }
-      elseif (!in_array($name, $whitelist, TRUE)) {
+      elseif ('external' !== $settings['type'] && !in_array($name, $whitelist, TRUE)) {
         unset($css[$name]);
       }
       else {
