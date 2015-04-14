@@ -21,6 +21,8 @@ function gulpifier_drush_command() {
 function drush_gulpifier_gulpify() {
   $theme = '';
 
+  // @TODO check for npm dependency
+
   // First question, do we need to create the theme structure?
   if (drush_confirm("Do you need to create a theme?")) {
     $theme = drush_gulpifier_create_structure();
@@ -51,14 +53,25 @@ function drush_gulpifier_gulpify() {
     // Start output buffering
     ob_start();
     // Include the template file
-    include 'sample.gulpfile.php';
+    include 'templates/sample.gulpfile.php';
     // End buffering and return its contents
     $contents = ob_get_clean();
-    $fp = fopen($theme_path . '/gulpfile.js', "w");
+    $fp = fopen($theme_path . '/gulpfile.js', 'w');
     fwrite($fp, $contents);
     fclose($fp);
 
+    // Start output buffering
+    ob_start();
+    // Include the template file
+    include 'templates/sample.package.php';
+    // End buffering and return its contents
+    $contents = ob_get_clean();
+    $fp = fopen($theme_path . '/package.json', 'w');
+    fwrite($fp, $contents);
+    fclose($fp);
+    drush_shell_cd_and_exec($theme_path, 'npm install');
   }
+
   $use_bootstrap = drush_confirm("Do you want to use bootstrap for your project?");
   if ($use_bootstrap) {
     if (!isset($css_compiler)) {
