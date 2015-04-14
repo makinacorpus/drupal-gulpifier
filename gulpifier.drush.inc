@@ -132,8 +132,8 @@ function drush_gulpifier_create_structure() {
   $profile = variable_get('install_profile', 'default');
   $paths = array(
     "profiles/$profile/themes/$name" => "Profile (profiles/$profile/themes/$name)",
-    'sites/all/themes/$theme_name' => "All themes (sites/all/themes/$name)",
-    'sites/all/themes/custom/$theme_name' => "Custom themes (sites/all/themes/custom/$name)",
+    "sites/all/themes/$name" => "All themes (sites/all/themes/$name)",
+    "sites/all/themes/custom/$name" => "Custom themes (sites/all/themes/custom/$name)",
   );
   $path = drush_choice($paths, 'Where do you want it to be created?');
 
