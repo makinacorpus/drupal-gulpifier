@@ -79,7 +79,7 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path) {
   $extension_info = drush_get_extensions(FALSE);
   if (!isset($extension_info['bootstrap']) && drush_confirm("Bootstrap base theme was not found, do you want to download it?")) {
     // Invoke a new process to download bootstrap.
-    $result = drush_invoke_process('@self', 'pm-download', 'bootstrap');
+    $result = drush_invoke_process('@self', 'pm-download', array('bootstrap'));
     drush_print($result);
     $potential_makefiles = drush_scan_directory('.', '.*\.make$');
     if (!empty($potential_makefiles) && drush_confirm("Do you want to add it to a makefile?")) {
