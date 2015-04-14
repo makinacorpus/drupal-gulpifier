@@ -81,7 +81,7 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path) {
     // Invoke a new process to download bootstrap.
     $result = drush_invoke_process('@self', 'pm-download', array('bootstrap'));
     drush_print($result);
-    $potential_makefiles = drush_scan_directory('.', '.*\.make$');
+    $potential_makefiles = drush_scan_directory('.', '@.*\.make$@');
     if (!empty($potential_makefiles) && drush_confirm("Do you want to add it to a makefile?")) {
       $makefile = drush_choice($potential_makefiles);
       drush_file_append_data($makefile, "
