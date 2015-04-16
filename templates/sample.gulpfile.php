@@ -17,7 +17,6 @@ var gulp = require('gulp'),
 <?php endif; ?>
 <?php if ($plugins['imagemin']['answer']): ?>
   imagemin = require('gulp-imagemin'),
-  pngquant = require('imagemin-pngquant'),
 <?php endif; ?>
 <?php if ($plugins['sourcemaps']['answer']): ?>
   sourcemaps = require('gulp-sourcemaps'),
@@ -140,12 +139,20 @@ gulp.task('sprite', function () {
 <?php endif; ?>
 
 gulp.task('default', [
+<?php if ($plugins['jshint']['answer']): ?>
   'jshint',
+<?php endif; ?>
   'js',
+<?php if ($plugins['sprite']['answer']): ?>
   'sprite',
+<?php endif; ?>
+<?php if ($plugins['imagemin']['answer']): ?>
   'images',
-  'less',
+<?php endif; ?>
+<?php if ($plugins['webfont']['answer']): ?>
   'icons'
+<?php endif; ?>
+  '<?php echo $css_compiler; ?>',
 ]);
 
 gulp.task('watch', function () {
