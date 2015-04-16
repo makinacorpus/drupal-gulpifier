@@ -59,7 +59,7 @@ function drush_gulpifier_gulpify() {
       ),
       'imagemin'   => array(
         'question' => "compress images",
-        'package' => 'gulp-imagemin imagemin-pngquant',
+        'package' => 'gulp-imagemin',
       ),
       'jshint'     => array(
         'question' => "verify the syntax of your files (JSHint)",

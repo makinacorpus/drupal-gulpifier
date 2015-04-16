@@ -101,8 +101,7 @@ gulp.task('less', function () {
 gulp.task('images', function () {
   return gulp.src(['./img*/*'<?php if($plugins['sprite']['answer']): ?>, './dist*/sprite.png'<?php endif; ?>])
     .pipe(imagemin({
-      progressive: true,
-      use: [pngquant()]
+      progressive: true
     }))
     .pipe(gulp.dest('.')).on('error', errorHandler);
 });
