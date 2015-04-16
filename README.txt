@@ -50,6 +50,12 @@ But we lack some manual override to, for example:
   * basically any tool that Gulp provides
 
 
+Install
+============
+
+Apply this core patch https://www.drupal.org/node/2329453#comment-9470115
+
+
 How it works
 ============
 
