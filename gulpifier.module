@@ -155,7 +155,7 @@ function gulpifier_get_whitelist($front_theme, $type) {
  * @param $whitelist
  *  The JS whitelist from the theme .info file
  */
-function gulpifier_discover_js(&$js, $map_path, $script_path, $whitelist) {
+function gulpifier_discover_js($js, $map_path, $script_path, $whitelist) {
   // Load previous list
   $contents = file_get_contents($map_path);
   $list = FALSE;
