@@ -11,6 +11,12 @@ function gulpifier_form_system_performance_settings_alter(&$form) {
     '#type'  => 'fieldset',
     '#title' => t("Gulpifier"),
   );
+  $form['gulpifier']['gulpifier_nocachebuster'] = array(
+    '#type'          => 'checkbox',
+    '#title'         => t("Prevent asset cache busting"),
+    '#description'   => t("In this mode, the GET parameter appended to assets (?123456789) will be removed, allowing you to edit in the broser."),
+    '#default_value' => variable_get('gulpifier_nocachebuster', FALSE),
+  );
   $form['gulpifier']['gulpifier_discover'] = array(
     '#type'          => 'checkbox',
     '#title'         => t("Enable JS discovery"),
@@ -241,5 +247,16 @@ function gulpifier_css_alter(&$css) {
     if (isset($css[$style_path])) {
       unset($css[$style_path]);
     }
+  }
+}
+
+
+/**
+ * Implements hook_process_html().
+ */
+function gulpifier_process_html(&$vars) {
+  if (variable_get('gulpifier_nocachebuster', FALSE) && !stristr($_GET['q'], 'flush-cache')) {
+    $vars['styles'] = preg_replace('@\.css\?.*"@U', '.css"', $vars['styles']);
+    $vars['scripts'] = preg_replace('@\.js\?.*"@U', '.js"', $vars['scripts']);
   }
 }
