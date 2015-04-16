@@ -137,7 +137,7 @@ function gulpifier_get_whitelist($front_theme, $type) {
     }
   }
 
-  return $whitelist[$type];
+  return isset($whitelist[$type]) ? $whitelist[$type] : array();
 }
 
 /**
