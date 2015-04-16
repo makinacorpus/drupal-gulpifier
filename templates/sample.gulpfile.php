@@ -3,7 +3,7 @@ var gulp = require('gulp'),
   concat = require('gulp-concat'),
   uglify = require('gulp-uglify'),
   cssmin = require('gulp-minify-css'),
-<?php if ($use_jhint): ?>
+<?php if ($plugins['jhint']['answer']): ?>
   jshint = require('gulp-jshint'),
 <?php endif; ?>
 <?php if ($css_compiler == 'less'): ?>
@@ -12,23 +12,23 @@ var gulp = require('gulp'),
 <?php if ($css_compiler == 'sass'): ?>
   sass = require('gulp-sass'),
 <?php endif; ?>
-<?php if ($use_gzip): ?>
+<?php if ($plugins['gzip']['answer']): ?>
   gzip = require('gulp-gzip'),
 <?php endif; ?>
-<?php if ($use_imagemin): ?>
+<?php if ($plugins['imagemin']['answer']): ?>
   imagemin = require('gulp-imagemin'),
   pngquant = require('imagemin-pngquant'),
 <?php endif; ?>
-<?php if ($use_sourcemaps): ?>
+<?php if ($plugins['sourcemaps']['answer']): ?>
   sourcemaps = require('gulp-sourcemaps'),
 <?php endif; ?>
-<?php if ($use_webfont): ?>
+<?php if ($plugins['webfont']['answer']): ?>
   iconfont = require('gulp-iconfont'),
 <?php endif; ?>
-<?php if ($use_sprite): ?>
+<?php if ($plugins['sprite']['answer']): ?>
   spritesmith = require('gulp.spritesmith'),
 <?php endif; ?>
-  use_sourcemaps = <?php echo $use_sourcemaps ? 'true' : 'false'; ?>;
+  use_sourcemaps = <?php echo $plugins['sourcemaps']['anwer'] ? 'true' : 'false'; ?>;
 
 
 // Concat and minify JS, reading map.json
@@ -50,14 +50,14 @@ gulp.task('js', function () {
     pipe = pipe.pipe(sourcemaps.write('./maps'));
   }
   return pipe.pipe(gulp.dest('./dist/'))
-<?php if ($use_gzip): ?>
+<?php if ($plugins['gzip']['answer']): ?>
     .pipe(gzip())
     .pipe(gulp.dest('./dist/'))
 <?php endif; ?>
     .on('error', errorHandler);
 });
 
-<?php if ($use_jshint): ?>
+<?php if ($plugins['jshint']['answer']): ?>
 // Verify JS syntax
 gulp.task('jshint', function () {
   return gulp.src([
@@ -88,7 +88,7 @@ gulp.task('less', function () {
   }
   return pipe
     .pipe(gulp.dest('./dist/'))
-<?php if ($use_gzip): ?>
+<?php if ($plugins['gzip']['answer']): ?>
     .pipe(gzip())
     .pipe(gulp.dest('./dist/'))
 <?php endif; ?>
@@ -96,10 +96,10 @@ gulp.task('less', function () {
 });
 <?php endif; ?>
 
-<?php if ($use_imagemin): ?>
+<?php if ($plugins['imagemin']['answer']): ?>
 // Optimisation des images
 gulp.task('images', function () {
-  return gulp.src(['./img*/*'<?php if($use_sprite): ?>, './dist*/sprite.png'<?php endif; ?>])
+  return gulp.src(['./img*/*'<?php if($plugins['sprite']['answer']): ?>, './dist*/sprite.png'<?php endif; ?>])
     .pipe(imagemin({
       progressive: true,
       use: [pngquant()]
@@ -108,7 +108,7 @@ gulp.task('images', function () {
 });
 <?php endif; ?>
 
-<?php if ($use_webfont): ?>
+<?php if ($plugins['webfont']['answer']): ?>
 // Icons
 gulp.task('icons', function () {
   return gulp.src('svg/*')
@@ -121,7 +121,7 @@ gulp.task('icons', function () {
 });
 <?php endif; ?>
 
-<?php if ($use_sprite): ?>
+<?php if ($plugins['sprite']['answer']): ?>
 gulp.task('sprite', function () {
   var spriteData =
     gulp.src('img/sprite/*.*') // source path of the sprite images
@@ -152,23 +152,23 @@ gulp.task('default', [
 gulp.task('watch', function () {
   gulp.watch(['./js/*', '../../modules/**/*.js'], [
     'js',
-<?php if ($use_jshint): ?>
+<?php if ($plugins['jshint']['answer']): ?>
     'jshint'
 <?php endif; ?>
   ]);
 <?php if ($css_compiler): ?>
   gulp.watch('./<?php echo $css_compiler; ?>/**/*', ['<?php echo $css_compiler; ?>']);
 <?php endif; ?>
-<?php if ($use_sprite): ?>
+<?php if ($plugins['sprite']['answer']): ?>
   gulp.watch('./img/*', ['images', 'sprite', 'less']);
 <?php endif; ?>
-<?php if ($use_imagemin): ?>
+<?php if ($plugins['imagemin']['answer']): ?>
   gulp.watch(['./img/*', '!./img/sprite.png'], ['images']);
 <?php endif; ?>
-<?php if ($use_sprite): ?>
+<?php if ($plugins['sprite']['answer']): ?>
   gulp.watch(['./img/*', '!./img/sprite.png'], ['sprite', 'images', 'less']);
 <?php endif; ?>
-<?php if ($use_webfont): ?>
+<?php if ($plugins['webfont']['answer']): ?>
   gulp.watch('./svg/*', ['icons']);
 <?php endif; ?>
 });

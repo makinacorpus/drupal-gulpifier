@@ -43,12 +43,49 @@ function drush_gulpifier_gulpify() {
       'less' => 'LESS',
       'sass' => 'SASS',
     ), "Do you want to use a CSS compiler?");
-    $use_sprite = drush_confirm("Do you want to create an image sprite?");
-    $use_webfont = drush_confirm("Do you want to create a custom webfont from SVG files?");
-    $use_sourcemaps = drush_confirm("Do you want to use sourcemaps?");
-    $use_imagemin = drush_confirm("Do you want to compress images?");
-    $use_jshint = drush_confirm("Do you want to verify the syntax of your files (JSHint)?");
-    $use_gzip = drush_confirm("Do you want to gzip your assets?");
+
+    $plugins = array(
+      'sprite'     => array(
+        'question' => "create an image sprite",
+        'package' => 'gulp.spritesmith',
+      ),
+      'webfont'    => array(
+        'question' => "create a custom webfont from SVG files",
+        'package' => 'gulp-iconfont',
+      ),
+      'sourcemaps' => array(
+        'question' => "use sourcemaps",
+        'package' => 'gulp-sourcemaps',
+      ),
+      'imagemin'   => array(
+        'question' => "compress images",
+        'package' => 'gulp-imagemin imagemin-pngquant',
+      ),
+      'jshint'     => array(
+        'question' => "verify the syntax of your files (JSHint)",
+        'package' => 'gulp-jshint',
+      ),
+      'gzip'       => array(
+        'question' => "gzip your assets",
+        'package' => 'gulp-gzip',
+      ),
+    );
+    $package_install = array(
+      'gulp',
+      'gulp-rename',
+      'gulp-concat',
+      'gulp-uglify',
+      'gulp-minify-css',
+    );
+    if ($css_compiler) {
+      $package_install[] = 'gulp-' . $css_compiler;
+    }
+    foreach ($plugins as $name => &$plugin) {
+      $plugin['answer'] = drush_confirm("Do you want to " . $plugin['question'] . '?');
+      if ($plugin['answer']) {
+        $package_install[] = $plugin['package'];
+      }
+    }
 
     // Start output buffering
     ob_start();
@@ -60,16 +97,22 @@ function drush_gulpifier_gulpify() {
     fwrite($fp, $contents);
     fclose($fp);
 
-    // Start output buffering
-    ob_start();
-    // Include the template file
-    include 'templates/sample.package.php';
-    // End buffering and return its contents
-    $contents = ob_get_clean();
-    $fp = fopen($theme_path . '/package.json', 'w');
-    fwrite($fp, $contents);
-    fclose($fp);
-    drush_shell_cd_and_exec($theme_path, 'npm install');
+    if (!file_exists($theme_path . '/package.json')) {
+      $package_json = array(
+        'name'    => $theme,
+        'version' => '0.1.0',
+        'private' => TRUE,
+      );
+      foreach ($package_install as $package) {
+        $package_json['devDependencies'][$package] = 'latest';
+      }
+      $fp = fopen($theme_path . '/package.json', 'w');
+      fwrite($fp, drupal_json_encode($package_json));
+      fclose($fp);
+    }
+
+    drush_print("To install gulp and its plugins, run cd $theme_path && npm install");
+    drush_print("To run gulp, run gulp. To watch files, run gulp watch.");
   }
 
   $use_bootstrap = drush_confirm("Do you want to use bootstrap for your project?");
@@ -85,7 +128,10 @@ function drush_gulpifier_gulpify() {
 }
 
 /**
+ * Prepare bootstrap install
+ *
  * @param $css_compiler
+ * @param $theme_path
  */
 function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path) {
   $makefile = NULL;
