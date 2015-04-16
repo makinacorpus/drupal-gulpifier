@@ -27,7 +27,7 @@ var gulp = require('gulp'),
 <?php if ($plugins['sprite']['answer']): ?>
   spritesmith = require('gulp.spritesmith'),
 <?php endif; ?>
-  use_sourcemaps = <?php echo $plugins['sourcemaps']['anwer'] ? 'true' : 'false'; ?>;
+  use_sourcemaps = <?php echo $plugins['sourcemaps']['answer'] ? 'true' : 'false'; ?>;
 
 
 // Concat and minify JS, reading map.json
