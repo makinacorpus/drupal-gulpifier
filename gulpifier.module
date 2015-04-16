@@ -226,6 +226,7 @@ function gulpifier_css_alter(&$css) {
     // Here we do a whitelist only on our file and inline CSS
     foreach ($css as $name => $settings) {
       if ($style_path === $name) {
+        $css[$name]['preprocess'] = FALSE;
         continue; // This is our file!
       }
 
