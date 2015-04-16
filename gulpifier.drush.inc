@@ -93,26 +93,23 @@ function drush_gulpifier_gulpify() {
     include 'templates/sample.gulpfile.php';
     // End buffering and return its contents
     $contents = ob_get_clean();
-    $fp = fopen($theme_path . '/gulpfile.js', 'w');
-    fwrite($fp, $contents);
-    fclose($fp);
+    file_put_contents($theme_path . '/gulpfile.js', $contents);
 
-    if (!file_exists($theme_path . '/package.json')) {
-      $package_json = array(
-        'name'    => $theme,
-        'version' => '0.1.0',
-        'private' => TRUE,
-      );
-      foreach ($package_install as $package) {
-        $package_json['devDependencies'][$package] = 'latest';
-      }
-      $fp = fopen($theme_path . '/package.json', 'w');
-      fwrite($fp, drupal_json_encode($package_json));
-      fclose($fp);
+    $package_json = array(
+      'name'    => $theme,
+      'version' => '0.1.0',
+      'private' => TRUE,
+    );
+    foreach ($package_install as $package) {
+      $package_json['devDependencies'][$package] = 'latest';
     }
+    file_put_contents($theme_path . '/package.json', json_encode($package_json, JSON_PRETTY_PRINT) . "\n");
 
-    drush_print("To install gulp and its plugins, run cd $theme_path && npm install");
+    $absolute_path = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT') . '/' . $theme_path;
+    drush_print();
+    drush_print("To install gulp and its plugins, run cd $absolute_path && npm install");
     drush_print("To run gulp, run gulp. To watch files, run gulp watch.");
+    drush_print();
   }
 
   $use_bootstrap = drush_confirm("Do you want to use bootstrap for your project?");
