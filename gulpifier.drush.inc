@@ -36,6 +36,8 @@ function drush_gulpifier_gulpify() {
 
   $theme_path = drupal_get_path('theme', $theme);
 
+  $absolute_path = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT') . '/' . $theme_path;
+
   // Non-existing gulpfile or confirmation
   if (!file_exists($theme_path . '/gulpfile.js') || drush_confirm("Already existing gulpfile, do you want to rewrite it?")) {
     $css_compiler = drush_choice(array(
@@ -105,11 +107,16 @@ function drush_gulpifier_gulpify() {
     }
     file_put_contents($theme_path . '/package.json', json_encode($package_json, JSON_PRETTY_PRINT) . "\n");
 
-    $absolute_path = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT') . '/' . $theme_path;
     drush_print();
     drush_print("To install gulp and its plugins, run cd $absolute_path && npm install");
     drush_print("To run gulp, run gulp. To watch files, run gulp watch.");
     drush_print();
+
+
+    if ($plugins['sprite']['answer']) {
+      drush_mkdir($absolute_path . '/images');
+      drush_mkdir($absolute_path . '/images/sprite');
+    }
   }
 
   $use_bootstrap = drush_confirm("Do you want to use bootstrap for your project?");
@@ -120,18 +127,26 @@ function drush_gulpifier_gulpify() {
         'sass' => 'SASS',
       ), "Which CSS compiler do you want to use?");
     }
-    drush_gulpifier_handle_bootstrap($css_compiler, $theme_path);
+    drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $theme);
   }
+
+  drush_mkdir($absolute_path . '/js');
+  drush_file_append_data($absolute_path . '/js/map.json', "{}\n");
+  drush_mkdir($absolute_path . '/less');
+  drush_mkdir($absolute_path . '/images');
 }
 
 /**
  * Prepare bootstrap install
  *
- * @param $css_compiler
- * @param $theme_path
+ * @param $css_compiler string CSS Compiler (Less, Sass, or '')
+ * @param $theme_path string Theme path
+ * @param $name string Theme name
  */
-function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path) {
+function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
   $makefile = NULL;
+  $absolute_theme_path = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT') . '/' . $theme_path;
+
   $extension_info = drush_get_extensions(FALSE);
   if (!isset($extension_info['bootstrap']) && drush_confirm("Bootstrap base theme was not found, do you want to download it?")) {
     // Invoke a new process to download bootstrap.
@@ -146,7 +161,13 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path) {
 projects[] = bootstrap
 ");
     }
+    drush_file_append_data($absolute_theme_path . '/' . $name . '.info', "
+
+; Include bootstrap from Gulpifier
+base theme = bootstrap
+");
   }
+
   if (!file_exists($theme_path . '/bootstrap')) {
     // Download sources
     $url = $css_compiler == 'less' ?
@@ -159,7 +180,6 @@ projects[] = bootstrap
       $extract_dir = drush_tempdir();
       $result = drush_tarball_extract($filename, $extract_dir, TRUE);
       if (!empty($result)) {
-        $absolute_theme_path = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT') . '/' . $theme_path;
         drush_mkdir($absolute_theme_path . '/bootstrap');
         foreach (array('fonts', 'js', $css_compiler) as $dir) {
           drush_move_dir($extract_dir . '/bootstrap-3.0.2/' . $dir, $absolute_theme_path . '/bootstrap/' . $dir);
@@ -167,6 +187,12 @@ projects[] = bootstrap
         drush_print("Done");
       }
     }
+  }
+
+  if (!file_exists($theme_path . '/less')) {
+    drush_print("Copying subtheme info...");
+    $sub_bootstrap_path = dirname($extension_info['bootstrap']->filename);
+    drush_copy_dir($sub_bootstrap_path . '/bootstrap_subtheme/less', $absolute_theme_path . '/less');
   }
 }
 
