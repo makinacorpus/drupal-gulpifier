@@ -222,7 +222,11 @@ function drush_gulpifier_create_structure() {
   // Create all that new structure
   drush_mkdir($path);
   $info_data = "name = $human_name
-core = 7.x";
+core = 7.x
+
+stylesheets[all][] = dist/style.min.css
+scripts[] = dist/script.min.js
+";
   drush_file_append_data($path . '/' . $name . '.info', $info_data);
 
   return $name;
