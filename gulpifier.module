@@ -196,7 +196,9 @@ function gulpifier_discover_js($js, $map_path, $script_path, $whitelist) {
   // Udpate map.json
   if ($list !== FALSE && defined('JSON_PRETTY_PRINT')) {
     $json = json_encode($list, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-    file_put_contents($map_path, $json . "\n");
+    if ($contents !== $json) {
+      file_put_contents($map_path, $json);
+    }
   }
 }
 
