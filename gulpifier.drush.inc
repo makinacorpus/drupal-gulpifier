@@ -150,17 +150,9 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
     if (!empty($potential_makefiles) && drush_confirm("Do you want to add it to a makefile?")) {
       $potential_makefiles = array_combine(array_keys($potential_makefiles),array_keys($potential_makefiles));
       $makefile = drush_choice($potential_makefiles);
-      drush_file_append_data($makefile, "
-
-; Include bootstrap for Gulpifier
-projects[] = bootstrap
-");
+      drush_file_append_data($makefile, "\n\n; Include bootstrap for Gulpifier\nprojects[] = bootstrap\n");
     }
-    drush_file_append_data($absolute_theme_path . '/' . $name . '.info', "
-
-; Include bootstrap from Gulpifier
-base theme = bootstrap
-");
+    drush_file_append_data($absolute_theme_path . '/' . $name . '.info', "\n\n; Include bootstrap from Gulpifier\nbase theme = bootstrap\n");
   }
 
   if (!file_exists($theme_path . '/bootstrap')) {
