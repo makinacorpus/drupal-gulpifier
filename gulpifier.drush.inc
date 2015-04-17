@@ -181,9 +181,10 @@ base theme = bootstrap
       $extract_dir = drush_tempdir();
       $result = drush_tarball_extract($filename, $extract_dir, TRUE);
       if (!empty($result)) {
+        $bootstrap_temp_dir = '/'.array_shift($result);
         drush_mkdir($absolute_theme_path . '/bootstrap');
         foreach (array('fonts', 'js', $css_compiler) as $dir) {
-          drush_move_dir($extract_dir . '/bootstrap-3.0.2/' . $dir, $absolute_theme_path . '/bootstrap/' . $dir);
+          drush_move_dir($extract_dir . $bootstrap_temp_dir . $dir, $absolute_theme_path . '/bootstrap/' . $dir);
         }
         drush_print("Done");
       }
