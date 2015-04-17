@@ -202,9 +202,10 @@ base theme = bootstrap
 function drush_gulpifier_handle_jquery_update($css_compiler, $theme_path, $name, $absolute_theme_path, $extension_info) {
   if (!isset($extension_info['jquery_update']) && drush_confirm("jQuery Update module was not found, do you want to download it?")) {
     // Invoke a new process to download bootstrap.
-    $result = drush_invoke_process('@self', 'pm-download', array('jquery_update'));
+    drush_invoke_process('@self', 'pm-download', array('jquery_update'));
     $potential_makefiles = drush_scan_directory('.', '@.*\.make$@');
     if (!empty($potential_makefiles) && drush_confirm("Do you want to add it to a makefile?")) {
+      $potential_makefiles = array_combine(array_keys($potential_makefiles),array_keys($potential_makefiles));
       $makefile = drush_choice($potential_makefiles);
       drush_file_append_data($makefile, "\nprojects[] = jquery_update\n");
     }
