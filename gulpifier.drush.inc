@@ -141,8 +141,8 @@ function drush_gulpifier_gulpify() {
 function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
   $makefile = NULL;
   $absolute_theme_path = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT') . '/' . $theme_path;
-
   $extension_info = drush_get_extensions(FALSE);
+  drush_gulpifier_handle_jquery_update($css_compiler, $theme_path, $name, $absolute_theme_path, $extension_info);
   if (!isset($extension_info['bootstrap']) && drush_confirm("Bootstrap base theme was not found, do you want to download it?")) {
     // Invoke a new process to download bootstrap.
     $result = drush_invoke_process('@self', 'pm-download', array('bootstrap'));
@@ -188,6 +188,26 @@ base theme = bootstrap
     drush_print("Copying subtheme info...");
     $sub_bootstrap_path = dirname($extension_info['bootstrap']->filename);
     drush_copy_dir($sub_bootstrap_path . '/bootstrap_subtheme/less', $absolute_theme_path . '/less');
+  }
+}
+
+
+/**
+ * Check if jquery_update is installed
+ *
+ * @param $css_compiler string CSS Compiler (Less, Sass, or '')
+ * @param $theme_path string Theme path
+ * @param $name string Theme name
+ */
+function drush_gulpifier_handle_jquery_update($css_compiler, $theme_path, $name, $absolute_theme_path, $extension_info) {
+  if (!isset($extension_info['jquery_update']) && drush_confirm("jQuery Update module was not found, do you want to download it?")) {
+    // Invoke a new process to download bootstrap.
+    $result = drush_invoke_process('@self', 'pm-download', array('jquery_update'));
+    $potential_makefiles = drush_scan_directory('.', '@.*\.make$@');
+    if (!empty($potential_makefiles) && drush_confirm("Do you want to add it to a makefile?")) {
+      $makefile = drush_choice($potential_makefiles);
+      drush_file_append_data($makefile, "\nprojects[] = jquery_update\n");
+    }
   }
 }
 
