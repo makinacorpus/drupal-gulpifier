@@ -6,12 +6,7 @@
 function gulpifier_drush_command() {
   $items['gulpify'] = array(
     'description' => "Initialize a theme to work with gulpifier.",
-    'options'     => array(
-      'spreads' => array(
-        'description'   => 'Comma delimited list of spreads.',
-        'example-value' => 'mayonnaise,mustard',
-      ),
-    ),
+    'options'     => array(),
     'aliases'     => array('gulpifier'),
     'bootstrap'   => DRUSH_BOOTSTRAP_DRUPAL_FULL,
   );
