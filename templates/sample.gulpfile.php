@@ -3,7 +3,7 @@ var gulp = require('gulp'),
   concat = require('gulp-concat'),
   uglify = require('gulp-uglify'),
   cssmin = require('gulp-minify-css'),
-<?php if ($plugins['jhint']['answer']): ?>
+<?php if ($plugins['jshint']['answer']): ?>
   jshint = require('gulp-jshint'),
 <?php endif; ?>
 <?php if ($css_compiler == 'less'): ?>
