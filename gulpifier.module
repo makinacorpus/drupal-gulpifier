@@ -27,7 +27,7 @@ function gulpifier_form_system_performance_settings_alter(&$form) {
     '#type'          => 'textfield',
     '#title'         => t("Path to the map.json file"),
     '#description'   => t("The path to the JSON map. It is advised to track it within your VCS, most probably in the theme."),
-    '#default_value' => variable_get('gulpifier_map_path', $theme_path . '/js/'),
+    '#default_value' => variable_get('gulpifier_map_path', $theme_path . '/js'),
   );
   $form['gulpifier']['gulpifier_single_js'] = array(
     '#type'          => 'checkbox',
@@ -76,7 +76,7 @@ function gulpifier_js_alter(&$js) {
 
   // First part of the proces, discover.
   if (variable_get('gulpifier_discover', FALSE)) {
-    $map_path = variable_get('gulpifier_map_path', $theme_path . '/src') . '/map.json';
+    $map_path = variable_get('gulpifier_map_path', $theme_path . '/js') . '/map.json';
 
     gulpifier_discover_js($js, $map_path, $script_path, $whitelist);
   }
