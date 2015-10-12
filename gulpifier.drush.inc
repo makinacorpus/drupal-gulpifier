@@ -145,22 +145,14 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
   drush_gulpifier_handle_jquery_update($css_compiler, $theme_path, $name, $absolute_theme_path, $extension_info);
   if (!isset($extension_info['bootstrap']) && drush_confirm("Bootstrap base theme was not found, do you want to download it?")) {
     // Invoke a new process to download bootstrap.
-    $result = drush_invoke_process('@self', 'pm-download', array('bootstrap'));
-    drush_print($result);
+    drush_invoke_process('@self', 'pm-download', array('bootstrap'));
     $potential_makefiles = drush_scan_directory('.', '@.*\.make$@');
     if (!empty($potential_makefiles) && drush_confirm("Do you want to add it to a makefile?")) {
+      $potential_makefiles = array_combine(array_keys($potential_makefiles),array_keys($potential_makefiles));
       $makefile = drush_choice($potential_makefiles);
-      drush_file_append_data($makefile, "
-
-; Include bootstrap for Gulpifier
-projects[] = bootstrap
-");
+      drush_file_append_data($makefile, "\n\n; Include bootstrap for Gulpifier\nprojects[] = bootstrap\n");
     }
-    drush_file_append_data($absolute_theme_path . '/' . $name . '.info', "
-
-; Include bootstrap from Gulpifier
-base theme = bootstrap
-");
+    drush_file_append_data($absolute_theme_path . '/' . $name . '.info', "\n\n; Include bootstrap from Gulpifier\nbase theme = bootstrap\n");
   }
 
   if (!file_exists($theme_path . '/bootstrap')) {
