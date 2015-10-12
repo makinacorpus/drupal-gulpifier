@@ -1,7 +1,7 @@
 
 Gulpifier module
 ================
-by SebCorbin from Makina Corpus
+by Makina Corpus
 
 This module ease the use of Gulp as a frontend automation tool for Drupal. It
 aims to provide a clean structure to work with JS and CSS files, as well as
@@ -15,7 +15,7 @@ development cycle.
 Philosophy
 ----------
 
-The module provides allow to respect current front-end performance tips:
+The module allows to respect current front-end performance tips:
 
   * fewer requests for assets (JS and CSS files)
   * minification
@@ -38,9 +38,10 @@ Drupal is already doing a good job for small sites:
 
 But we lack some manual override to, for example:
 
-  * have a single JS file (not 3 or 4 bundles), there is Advagg module that can
-  help with that, but we aim to decide manually which script goes in our single
-  bundle
+  * have a single JS file (not 3 or 4 bundles, changing along with the pages),
+  there is Advagg module that can help with that, but we aim to decide manually
+  which scripts go in our single bundle and have this bundle always included,
+  and thus cached by the browser
   * have a single CSS file, clean of all core and module work, usually we want
   to start our theming from scratch, without conflicts from modules
   * be able to use LESS or SASS, with sourcemaps for easier debugging
@@ -54,10 +55,23 @@ Install
 ============
 
 Apply this core patch https://www.drupal.org/node/2329453#comment-9470115
+This prevent from having segmentation faults when clearing caches (due to
+malformed .info files in node_modules)
 
 
 How it works
 ============
+
+All settings for gulpifier are relative to a theme, so you can use it on any
+theme, may it be front-end or back-end, or multiple themes at once.
+
+Most settings can be set in the interface trhough the theme settings form,
+but we recommend to st them in your theme's .info file so that they are tracked
+in your VCS. These are always prefixed by `settings[gulpifier_...]`
+
+Firstly, to enable gulpifier for a theme, use `settings[gulpifier_enabled] = 1`
+in your theme info file, or trough the checkbox of your theme settings form.
+
 
 Single JS bundle
 ----------------
@@ -67,20 +81,18 @@ of JS files, that will be later minified and compressed by Gulp.
 JS files provided by core, modules, or theme are going to this generated map,
 it can be manually modified to blacklist any file that you don't want to go in
 the bundle, or to change the order of the files within the bundle.
-A good example of JS file to blacklist is token.js, there will never be a time
+A good example of JS file to blacklist is token.js, there will rearely be a time
 when your anonymous visitors will access the Token dialog, although it may have
-been picked by the discovery process.
+been picked by the discovery process. You can set it in the info file with
+`settings[gulpifier_discover]`. The path to the map.json file is by default in
+`yourtheme/js/map.json` but you can override it in your theme info file with
+`settings[gulpifier_map_path]`.
 
-This feature is linked to the variable `gulpifier_discover`, that you can
-change in _Configuration > Development > Performance_ or via your settings.php
-file.
-
-
-There is also a whitelist of JS files, that Gulpifier won't touch, they won't go
-into map.json and will be added on the page as Drupal does otherwise.
+There is also a whitelist of JS files, that Gulpifier won't process, they won't
+go into map.json and will be added on the page as Drupal does otherwise.
 A good example for this whitelist is admin_menu.js, it needs to be present when
-you are logged in, but there is not point to have in the bundle, nor to put it
-in the blacklist.
+you are logged in, but there is not point to have it in the bundle, nor to put
+it in the blacklist.
 This whitelist is defined in the .info file of your theme:
 
     gulpifier_whitelist[js][] = "admin_menu:admin_menu.js"
@@ -94,15 +106,14 @@ relative to the DRUPAL_ROOT:
 
 As soon as you modify this whitelist, don't forget to flush your theme registry.
 
-This feature is linked to the variable `gulpifier_single_js`, that you can
-change in _Configuration > Development > Performance_ or via your settings.php
-file.
+You can activate the single JS bundle in the info file with
+`settings[gulpifier_single_js]`.
 
 
 Single CSS bundle
 -----------------
 
-All CSS are by default removed from the front-end, core and module. This allows
+All CSS are by default removed from the front-end, core and modules. This allows
 you to start fresh from a Framework like bootstrap without worrying about other
 files.
 
@@ -124,6 +135,5 @@ relative to the DRUPAL_ROOT, that also works for base themes:
 
 As soon as you modify this whitelist, don't forget to flush your theme registry.
 
-This feature is linked to the variable `gulpifier_single_css`, that you can
-change in _Configuration > Development > Performance_ or via your settings.php
-file.
+You can activate the single CSS bundle in the info file with
+`settings[gulpifier_single_js]`.

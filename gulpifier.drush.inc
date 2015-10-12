@@ -44,27 +44,27 @@ function drush_gulpifier_gulpify() {
     $plugins = array(
       'sprite'     => array(
         'question' => "create an image sprite",
-        'package' => 'gulp.spritesmith',
+        'package'  => 'gulp.spritesmith',
       ),
       'webfont'    => array(
         'question' => "create a custom webfont from SVG files",
-        'package' => 'gulp-iconfont',
+        'package'  => 'gulp-iconfont',
       ),
       'sourcemaps' => array(
         'question' => "use sourcemaps",
-        'package' => 'gulp-sourcemaps',
+        'package'  => 'gulp-sourcemaps',
       ),
       'imagemin'   => array(
         'question' => "compress images",
-        'package' => 'gulp-imagemin',
+        'package'  => 'gulp-imagemin',
       ),
       'jshint'     => array(
         'question' => "verify the syntax of your files (JSHint)",
-        'package' => 'gulp-jshint',
+        'package'  => 'gulp-jshint',
       ),
       'gzip'       => array(
         'question' => "gzip your assets",
-        'package' => 'gulp-gzip',
+        'package'  => 'gulp-gzip',
       ),
     );
     $package_install = array(
@@ -127,8 +127,9 @@ function drush_gulpifier_gulpify() {
 
   drush_mkdir($absolute_path . '/js');
   drush_file_append_data($absolute_path . '/js/map.json', "{}\n");
-  drush_mkdir($absolute_path . '/less');
-  drush_mkdir($absolute_path . '/images');
+  if (isset($css_compiler)) {
+    drush_mkdir($absolute_path . '/' . $css_compiler);
+  }
 }
 
 /**
@@ -148,7 +149,7 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
     drush_invoke_process('@self', 'pm-download', array('bootstrap'));
     $potential_makefiles = drush_scan_directory('.', '@.*\.make$@');
     if (!empty($potential_makefiles) && drush_confirm("Do you want to add it to a makefile?")) {
-      $potential_makefiles = array_combine(array_keys($potential_makefiles),array_keys($potential_makefiles));
+      $potential_makefiles = array_combine(array_keys($potential_makefiles), array_keys($potential_makefiles));
       $makefile = drush_choice($potential_makefiles);
       drush_file_append_data($makefile, "\n\n; Include bootstrap for Gulpifier\nprojects[] = bootstrap\n");
     }
@@ -197,7 +198,7 @@ function drush_gulpifier_handle_jquery_update($css_compiler, $theme_path, $name,
     drush_invoke_process('@self', 'pm-download', array('jquery_update'));
     $potential_makefiles = drush_scan_directory('.', '@.*\.make$@');
     if (!empty($potential_makefiles) && drush_confirm("Do you want to add it to a makefile?")) {
-      $potential_makefiles = array_combine(array_keys($potential_makefiles),array_keys($potential_makefiles));
+      $potential_makefiles = array_combine(array_keys($potential_makefiles), array_keys($potential_makefiles));
       $makefile = drush_choice($potential_makefiles);
       drush_file_append_data($makefile, "\nprojects[] = jquery_update\n");
     }
@@ -222,8 +223,8 @@ function drush_gulpifier_create_structure() {
   $profile = variable_get('install_profile', 'default');
   $paths = array(
     "profiles/$profile/themes/$name" => "Profile (profiles/$profile/themes/$name)",
-    "sites/all/themes/$name" => "All themes (sites/all/themes/$name)",
-    "sites/all/themes/custom/$name" => "Custom themes (sites/all/themes/custom/$name)",
+    "sites/all/themes/$name"         => "All themes (sites/all/themes/$name)",
+    "sites/all/themes/custom/$name"  => "Custom themes (sites/all/themes/custom/$name)",
   );
   $path = drush_choice($paths, 'Where do you want it to be created?');
 
