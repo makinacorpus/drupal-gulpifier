@@ -117,6 +117,10 @@ function drush_gulpifier_gulpify() {
     }
   }
 
+  if (isset($css_compiler)) {
+    drush_mkdir($absolute_path . '/' . $css_compiler);
+  }
+
   $use_bootstrap = drush_confirm("Do you want to use bootstrap for your project?");
   if ($use_bootstrap) {
     if (!isset($css_compiler)) {
@@ -130,9 +134,6 @@ function drush_gulpifier_gulpify() {
 
   drush_mkdir($absolute_path . '/js');
   drush_file_append_data($absolute_path . '/js/map.json', "{}\n");
-  if (isset($css_compiler)) {
-    drush_mkdir($absolute_path . '/' . $css_compiler);
-  }
 }
 
 /**
@@ -146,7 +147,10 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
   $makefile = NULL;
   $absolute_theme_path = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT') . '/' . $theme_path;
   $extension_info = drush_get_extensions(FALSE);
+
+  // Handle jQuery update
   drush_gulpifier_handle_jquery_update($css_compiler, $theme_path, $name, $absolute_theme_path, $extension_info);
+
   if (!isset($extension_info['bootstrap']) && drush_confirm("Bootstrap base theme was not found, do you want to download it?")) {
     // Invoke a new process to download bootstrap.
     drush_invoke_process('@self', 'pm-download', array('bootstrap'));
@@ -158,15 +162,27 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
     }
   }
 
-  // Append some boostrap properties to the info file
+  // Append some bootstrap properties to the info file
   drush_file_append_data($absolute_theme_path . '/' . $name . '.info', "\n\n; Include bootstrap from Gulpifier\nbase theme = bootstrap\n");
 
   if (!file_exists($theme_path . '/bootstrap')) {
     // Download sources
-    $url = $css_compiler == 'less' ?
-      'https://github.com/twbs/bootstrap/archive/v3.0.2.zip' :
-      'https://github.com/twbs/bootstrap-sass/archive/v3.0.2.tar.gz';
-    drush_print("Downloading boostrap sources from " . $url);
+    $repo_name = $css_compiler == 'less' ? 'bootstrap' : 'bootstrap-sass';
+    $response = drupal_http_request('https://api.github.com/repos/twbs/' . $repo_name . '/releases');
+    $response_tags = json_decode($response->data);
+    $tags = array();
+    foreach ($response_tags as $tag) {
+      $tags[$tag->tag_name] = $tag->tag_name;
+    }
+    $chosen = drush_choice($tags, "Choose a boostrap version");
+
+    $url = '';
+    foreach ($response_tags as $tag) {
+      if ($tag->tag_name == $chosen) {
+        $url = $tag->tarball_url;
+      }
+    }
+    drush_print("Downloading bootstrap sources from " . $url);
     $filename = drush_download_file($url, drush_tempdir());
     if (drush_file_is_tarball($filename)) {
       drush_print("Unpacking...");
@@ -174,12 +190,30 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
       $result = drush_tarball_extract($filename, $extract_dir, TRUE);
       if (!empty($result)) {
         drush_mkdir($absolute_theme_path . '/bootstrap');
-        foreach (array('fonts', 'js', $css_compiler) as $dir) {
-          drush_move_dir($extract_dir . '/bootstrap-3.0.2/' . $dir, $absolute_theme_path . '/bootstrap/' . $dir);
+        $source_dirs = $css_compiler == 'less' ? drupal_map_assoc(array(
+          'fonts',
+          'js',
+          'less',
+        )) : array(
+          'assets/fonts/bootstrap' => 'fonts',
+          'assets/javascripts/bootstrap' => 'js',
+          'assets/stylesheets/bootstrap' => 'scss',
+          'vendor/assets/fonts/bootstrap' => 'fonts',
+          'vendor/assets/javascripts/bootstrap' => 'js',
+          'vendor/assets/stylesheets/bootstrap' => 'scss',
+        );
+        foreach ($source_dirs as $source => $dest) {
+          $dir = $extract_dir . '/' . $result[0] . $source;
+          if (is_dir($dir)) {
+            drush_move_dir($dir, $absolute_theme_path . '/bootstrap/' . $dest);
+          }
         }
         drush_print("Done");
       }
     }
+  }
+  else {
+    drush_print("Bootstrap sources already exist in  " . $theme_path . '/bootstrap');
   }
 
   if (!file_exists($theme_path . '/' . $css_compiler)) {
