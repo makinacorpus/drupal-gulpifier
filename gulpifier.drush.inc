@@ -233,8 +233,17 @@ function drush_gulpifier_create_structure() {
   $info_data = "name = $human_name
 core = 7.x
 
+; Bundle files, don't remove
 stylesheets[all][] = dist/style.min.css
 scripts[] = dist/script.min.js
+
+; Gulpifier settings
+settings[gulpifier_enabled] = 1
+
+settings[gulpifier_single_js] = 1
+settings[gulpifier_js_discovery] = 1
+
+settings[gulpifier_single_css] = 1
 ";
   drush_file_append_data($path . '/' . $name . '.info', $info_data);
 
