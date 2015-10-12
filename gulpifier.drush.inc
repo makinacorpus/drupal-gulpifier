@@ -6,12 +6,7 @@
 function gulpifier_drush_command() {
   $items['gulpify'] = array(
     'description' => "Initialize a theme to work with gulpifier.",
-    'options'     => array(
-      'spreads' => array(
-        'description'   => 'Comma delimited list of spreads.',
-        'example-value' => 'mayonnaise,mustard',
-      ),
-    ),
+    'options'     => array(),
     'aliases'     => array('gulpifier'),
     'bootstrap'   => DRUSH_BOOTSTRAP_DRUPAL_FULL,
   );
@@ -146,8 +141,8 @@ function drush_gulpifier_gulpify() {
 function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
   $makefile = NULL;
   $absolute_theme_path = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT') . '/' . $theme_path;
-
   $extension_info = drush_get_extensions(FALSE);
+  drush_gulpifier_handle_jquery_update($css_compiler, $theme_path, $name, $absolute_theme_path, $extension_info);
   if (!isset($extension_info['bootstrap']) && drush_confirm("Bootstrap base theme was not found, do you want to download it?")) {
     // Invoke a new process to download bootstrap.
     $result = drush_invoke_process('@self', 'pm-download', array('bootstrap'));
@@ -172,19 +167,17 @@ base theme = bootstrap
     // Download sources
     $url = $css_compiler == 'less' ?
       'https://github.com/twbs/bootstrap/archive/v3.0.2.zip' :
-      'https://github.com/twbs/bootstrap-sass/archive/v3.0.2.0.tar.gz';
+      'https://github.com/twbs/bootstrap-sass/archive/v3.0.2.tar.gz';
     drush_print("Downloading boostrap sources from " . $url);
     $filename = drush_download_file($url, drush_tempdir());
-    drush_print('filename : '.$filename);
     if (drush_file_is_tarball($filename)) {
       drush_print("Unpacking...");
       $extract_dir = drush_tempdir();
       $result = drush_tarball_extract($filename, $extract_dir, TRUE);
       if (!empty($result)) {
-        $bootstrap_temp_dir = '/'.array_shift($result);
         drush_mkdir($absolute_theme_path . '/bootstrap');
         foreach (array('fonts', 'js', $css_compiler) as $dir) {
-          drush_move_dir($extract_dir . $bootstrap_temp_dir . $dir, $absolute_theme_path . '/bootstrap/' . $dir);
+          drush_move_dir($extract_dir . '/bootstrap-3.0.2/' . $dir, $absolute_theme_path . '/bootstrap/' . $dir);
         }
         drush_print("Done");
       }
@@ -195,6 +188,27 @@ base theme = bootstrap
     drush_print("Copying subtheme info...");
     $sub_bootstrap_path = dirname($extension_info['bootstrap']->filename);
     drush_copy_dir($sub_bootstrap_path . '/bootstrap_subtheme/less', $absolute_theme_path . '/less');
+  }
+}
+
+
+/**
+ * Check if jquery_update is installed
+ *
+ * @param $css_compiler string CSS Compiler (Less, Sass, or '')
+ * @param $theme_path string Theme path
+ * @param $name string Theme name
+ */
+function drush_gulpifier_handle_jquery_update($css_compiler, $theme_path, $name, $absolute_theme_path, $extension_info) {
+  if (!isset($extension_info['jquery_update']) && drush_confirm("jQuery Update module was not found, do you want to download it?")) {
+    // Invoke a new process to download bootstrap.
+    drush_invoke_process('@self', 'pm-download', array('jquery_update'));
+    $potential_makefiles = drush_scan_directory('.', '@.*\.make$@');
+    if (!empty($potential_makefiles) && drush_confirm("Do you want to add it to a makefile?")) {
+      $potential_makefiles = array_combine(array_keys($potential_makefiles),array_keys($potential_makefiles));
+      $makefile = drush_choice($potential_makefiles);
+      drush_file_append_data($makefile, "\nprojects[] = jquery_update\n");
+    }
   }
 }
 
