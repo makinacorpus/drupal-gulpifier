@@ -14,22 +14,25 @@ function gulpifier_drush_command() {
 }
 
 function drush_gulpifier_gulpify() {
-  $theme = '';
+  $theme = $theme_path = '';
 
   // @TODO check for npm dependency
 
   // First question, do we need to create the theme structure?
   if (drush_confirm("Do you need to create a theme?")) {
+    system_rebuild_theme_data(); // just to refresh cache
     $theme = drush_gulpifier_create_structure();
+    system_rebuild_theme_data(); // just to refresh cache
+    $themes = list_themes(TRUE);
+    $theme_path = dirname($themes[$theme]->filename);
   }
 
   // Second question, get the theme to work on
   if (!$theme) {
     drush_include_engine('drupal', 'environment');
     $theme = drush_choice(drush_get_themes(), 'Which theme do you want to gulpify?', '!key');
+    $theme_path = drupal_get_path('theme', $theme);
   }
-
-  $theme_path = drupal_get_path('theme', $theme);
 
   $absolute_path = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT') . '/' . $theme_path;
 
@@ -153,8 +156,10 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
       $makefile = drush_choice($potential_makefiles);
       drush_file_append_data($makefile, "\n\n; Include bootstrap for Gulpifier\nprojects[] = bootstrap\n");
     }
-    drush_file_append_data($absolute_theme_path . '/' . $name . '.info', "\n\n; Include bootstrap from Gulpifier\nbase theme = bootstrap\n");
   }
+
+  // Append some boostrap properties to the info file
+  drush_file_append_data($absolute_theme_path . '/' . $name . '.info', "\n\n; Include bootstrap from Gulpifier\nbase theme = bootstrap\n");
 
   if (!file_exists($theme_path . '/bootstrap')) {
     // Download sources
@@ -177,10 +182,11 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
     }
   }
 
-  if (!file_exists($theme_path . '/less')) {
+  if (!file_exists($theme_path . '/' . $css_compiler)) {
     drush_print("Copying subtheme info...");
     $sub_bootstrap_path = dirname($extension_info['bootstrap']->filename);
-    drush_copy_dir($sub_bootstrap_path . '/bootstrap_subtheme/less', $absolute_theme_path . '/less');
+    drush_copy_dir($sub_bootstrap_path . '/bootstrap_subtheme/' . $css_compiler, $absolute_theme_path . '/' . $css_compiler);
+    drush_print("Please take the time to copy-paste info from bootstrap_subtheme.info.starterkit from the parent theme.");
   }
 }
 
@@ -213,9 +219,10 @@ function drush_gulpifier_handle_jquery_update($css_compiler, $theme_path, $name,
  * @return string name
  */
 function drush_gulpifier_create_structure() {
+  $machine_names = array_merge(array_keys(module_list()), array_keys(list_themes()));
   do {
     $name = drush_prompt("What will be the system name? (lowercase, only letters and _)");
-  } while (!preg_match('@[a-z_]+@', $name));
+  } while (!preg_match('@[a-z_]+@', $name) || (in_array($name, $machine_names) && !drush_print("Machine name already taken")));
 
   $human_name = drush_prompt("What will be the human-readable name?");
 
