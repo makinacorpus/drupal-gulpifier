@@ -172,17 +172,19 @@ base theme = bootstrap
     // Download sources
     $url = $css_compiler == 'less' ?
       'https://github.com/twbs/bootstrap/archive/v3.0.2.zip' :
-      'https://github.com/twbs/bootstrap-sass/archive/v3.0.2.tar.gz';
+      'https://github.com/twbs/bootstrap-sass/archive/v3.0.2.0.tar.gz';
     drush_print("Downloading boostrap sources from " . $url);
     $filename = drush_download_file($url, drush_tempdir());
+    drush_print('filename : '.$filename);
     if (drush_file_is_tarball($filename)) {
       drush_print("Unpacking...");
       $extract_dir = drush_tempdir();
       $result = drush_tarball_extract($filename, $extract_dir, TRUE);
       if (!empty($result)) {
+        $bootstrap_temp_dir = '/'.array_shift($result);
         drush_mkdir($absolute_theme_path . '/bootstrap');
         foreach (array('fonts', 'js', $css_compiler) as $dir) {
-          drush_move_dir($extract_dir . '/bootstrap-3.0.2/' . $dir, $absolute_theme_path . '/bootstrap/' . $dir);
+          drush_move_dir($extract_dir . $bootstrap_temp_dir . $dir, $absolute_theme_path . '/bootstrap/' . $dir);
         }
         drush_print("Done");
       }
