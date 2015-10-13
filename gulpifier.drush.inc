@@ -16,8 +16,6 @@ function gulpifier_drush_command() {
 function drush_gulpifier_gulpify() {
   $theme = $theme_path = '';
 
-  // @TODO check for npm dependency
-
   // First question, do we need to create the theme structure?
   if (drush_confirm("Do you need to create a theme?")) {
     system_rebuild_theme_data(); // just to refresh cache
@@ -106,8 +104,14 @@ function drush_gulpifier_gulpify() {
     file_put_contents($theme_path . '/package.json', json_encode($package_json, JSON_PRETTY_PRINT) . "\n");
 
     drush_print();
-    drush_print("To install gulp and its plugins, run cd $absolute_path && npm install");
-    drush_print("To run gulp, run gulp. To watch files, run gulp watch.");
+    if (!exec('npm --version')) {
+      drush_print("You first need to install npm, check out https://nodejs.org/");
+    }
+    if (!exec('gulp --version')) {
+      drush_print("You need to install globally, run:\n\tnpm install -g gulp");
+    }
+    drush_print("To install gulp and its plugins, run:\n\tcd $absolute_path && npm install");
+    drush_print("To run gulp, 'run gulp'. To watch files, run 'gulp watch'.");
     drush_print();
 
 
