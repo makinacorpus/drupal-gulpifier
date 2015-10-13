@@ -88,6 +88,8 @@ been picked by the discovery process. You can set it in the info file with
 `yourtheme/js/map.json` but you can override it in your theme info file with
 `settings[gulpifier_map_path]`.
 
+### Whitelist
+
 There is also a whitelist of JS files, that Gulpifier won't process, they won't
 go into map.json and will be added on the page as Drupal does otherwise.
 A good example for this whitelist is admin_menu.js, it needs to be present when
@@ -95,16 +97,24 @@ you are logged in, but there is not point to have it in the bundle, nor to put
 it in the blacklist.
 This whitelist is defined in the .info file of your theme:
 
-    gulpifier_whitelist[js][] = "admin_menu:admin_menu.js"
+    settings[gulpifier_whitelist][js][] = "admin_menu:admin_menu.js"
 
 You can see that there is a special notation "module_name:internal_path" that
 can be used, it's more human-readable and doesn't care about subdirectories that
 these modules may be in. If you wish, you can also use absolute path, still
 relative to the DRUPAL_ROOT:
 
-    gulpifier_whitelist[js][] = "sites/all/modules/admin_menu/admin_menu.js"
+    settings[gulpifier_whitelist][js][] = "sites/all/modules/admin_menu/admin_menu.js"
 
 As soon as you modify this whitelist, don't forget to flush your theme registry.
+
+### Blacklist
+
+In case you don't want some JS files either in the map.json nor in any pages,
+put them in the js_blacklist as such:
+
+    settings[gulpifier_js_blacklist][] = "toolbar:toolbar.js"
+
 
 You can activate the single JS bundle in the info file with
 `settings[gulpifier_single_js]`.
@@ -124,16 +134,36 @@ you are visinting a page with a widget, but there is not point to have in the
 bundle, if this widget is only on one page of your site.
 This whitelist is defined in the .info file of your theme:
 
-    gulpifier_whitelist[css][] = "admin_menu:admin_menu.js"
+    settings[gulpifier_whitelist][css][] = "admin_menu:admin_menu.js"
 
 You can see that there is a special notation "module_name:internal_path" that
 can be used, it's more human-readable and doesn't care about subdirectories that
 these modules may be in. If you wish, you can also use absolute path, still
 relative to the DRUPAL_ROOT, that also works for base themes:
 
-    gulpifier_whitelist[css][] = "sites/all/themes/rubik/views-admin.rubik.css"
+    settings[gulpifier_whitelist][css][] = "sites/all/themes/rubik/views-admin.rubik.css"
 
 As soon as you modify this whitelist, don't forget to flush your theme registry.
 
 You can activate the single CSS bundle in the info file with
 `settings[gulpifier_single_js]`.
+
+
+Other settings
+--------------
+
+Most of the paths are overridable, e.g.: the map.json, the bundles but you must
+change them also in the generated `gulpfile.js`.
+
+### Same scope/group
+
+This setting is available for both JS and CSS and allow all remaining files that
+would not be in the bundle to be aggregated in a single remaining file
+
+### No cache buster
+
+Some gulp modules or browser refreshing features won't work with the cache
+busting parameter (`?abcdef`) that is added to the assets. It is totally
+optional and gulpifier does not require it at all. But you can learn more here:
+  - https://hacks.mozilla.org/2014/02/live-editing-sass-and-less-in-the-firefox-developer-tools/
+  - http://code.tutsplus.com/tutorials/working-with-less-and-the-chrome-devtools--net-36636
