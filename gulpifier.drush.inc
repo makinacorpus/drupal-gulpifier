@@ -157,12 +157,15 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
 
   if (!isset($extension_info['bootstrap']) && drush_confirm("Bootstrap base theme was not found, do you want to download it?")) {
     // Invoke a new process to download bootstrap.
-    drush_invoke_process('@self', 'pm-download', array('bootstrap'));
+    drush_invoke_process('@self', 'pm-download', array('bootstrap'), array('--select'), array('interactive' => TRUE));
     $potential_makefiles = drush_scan_directory('.', '@.*\.make$@');
     if (!empty($potential_makefiles) && drush_confirm("Do you want to add it to a makefile?")) {
       $potential_makefiles = array_combine(array_keys($potential_makefiles), array_keys($potential_makefiles));
       $makefile = drush_choice($potential_makefiles);
-      drush_file_append_data($makefile, "\n\n; Include bootstrap for Gulpifier\nprojects[] = bootstrap\n");
+      if ($makefile) {
+        // @TODO specify bootstrap version in the makefile
+        drush_file_append_data($makefile, "\n\n; Include bootstrap for Gulpifier\nprojects[] = bootstrap\n");
+      }
     }
   }
 
@@ -202,10 +205,10 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
           'js',
           'less',
         )) : array(
-          'assets/fonts/bootstrap' => 'fonts',
-          'assets/javascripts/bootstrap' => 'js',
-          'assets/stylesheets/bootstrap' => 'scss',
-          'vendor/assets/fonts/bootstrap' => 'fonts',
+          'assets/fonts/bootstrap'              => 'fonts',
+          'assets/javascripts/bootstrap'        => 'js',
+          'assets/stylesheets/bootstrap'        => 'scss',
+          'vendor/assets/fonts/bootstrap'       => 'fonts',
           'vendor/assets/javascripts/bootstrap' => 'js',
           'vendor/assets/stylesheets/bootstrap' => 'scss',
         );
@@ -218,6 +221,7 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
         drush_print("Done");
       }
     }
+    $extension_info = drush_get_extensions(FALSE);
   }
   else {
     drush_print("Bootstrap sources already exist in  " . $theme_path . '/bootstrap');
@@ -226,8 +230,13 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
   if (!file_exists($theme_path . '/' . $css_compiler)) {
     drush_print("Copying subtheme info...");
     $sub_bootstrap_path = dirname($extension_info['bootstrap']->filename);
-    drush_copy_dir($sub_bootstrap_path . '/bootstrap_subtheme/' . $css_compiler, $absolute_theme_path . '/' . $css_compiler);
-    drush_print("Please take the time to copy-paste info from bootstrap_subtheme.info.starterkit from the parent theme.");
+    if (is_dir($sub_bootstrap_path . '/bootstrap_subtheme')) {
+      drush_copy_dir($sub_bootstrap_path . '/bootstrap_subtheme/' . $css_compiler, $absolute_theme_path . '/' . $css_compiler);
+    }
+    elseif (is_dir($sub_bootstrap_path . '/starterkits/' . $css_compiler)) {
+      drush_copy_dir($sub_bootstrap_path . '/starterkits/less/less', $absolute_theme_path . '/' . $css_compiler);
+    }
+    drush_print("Please take the time to copy-paste info from starterkit from the boostrap theme.");
   }
 }
 
