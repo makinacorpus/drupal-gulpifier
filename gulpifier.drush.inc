@@ -117,10 +117,6 @@ function drush_gulpifier_gulpify() {
     }
   }
 
-  if (isset($css_compiler)) {
-    drush_mkdir($absolute_path . '/' . $css_compiler);
-  }
-
   $use_bootstrap = drush_confirm("Do you want to use bootstrap for your project?");
   if ($use_bootstrap) {
     if (!isset($css_compiler)) {
@@ -130,6 +126,10 @@ function drush_gulpifier_gulpify() {
       ), "Which CSS compiler do you want to use?");
     }
     drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $theme);
+  }
+
+  if (isset($css_compiler)) {
+    drush_mkdir($absolute_path . '/' . $css_compiler);
   }
 
   drush_mkdir($absolute_path . '/js');
@@ -163,7 +163,10 @@ function drush_gulpifier_handle_bootstrap($css_compiler, $theme_path, $name) {
   }
 
   // Append some bootstrap properties to the info file
-  drush_file_append_data($absolute_theme_path . '/' . $name . '.info', "\n\n; Include bootstrap from Gulpifier\nbase theme = bootstrap\n");
+  $themes = list_themes();
+  if (empty($themes[$name]->info['base theme'])) {
+    drush_file_append_data($absolute_theme_path . '/' . $name . '.info', "\n; Include bootstrap from Gulpifier\nbase theme = bootstrap\nsettings[bootstrap_cdn] = ''\n");
+  }
 
   if (!file_exists($theme_path . '/bootstrap')) {
     // Download sources
@@ -278,13 +281,17 @@ core = 7.x
 stylesheets[all][] = dist/style.min.css
 scripts[] = dist/script.min.js
 
-; Gulpifier settings
+; --- Gulpifier settings ---
 settings[gulpifier_enabled] = 1
 
 settings[gulpifier_single_js] = 1
 settings[gulpifier_js_discovery] = 1
 
 settings[gulpifier_single_css] = 1
+
+; Whitelist
+;settings[gulpifier_whitelist][css][] = admin_menu:admin_menu.css
+;settings[gulpifier_whitelist][js][] = admin_menu:admin_menu.js
 ";
   drush_file_append_data($path . '/' . $name . '.info', $info_data);
 
