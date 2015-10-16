@@ -150,9 +150,9 @@ gulp.task('default', [
   'images',
 <?php endif; ?>
 <?php if ($plugins['webfont']['answer']): ?>
-  'icons'
+  'icons',
 <?php endif; ?>
-  '<?php echo $css_compiler; ?>',
+  '<?php echo $css_compiler; ?>'
 ]);
 
 gulp.task('watch', function () {
