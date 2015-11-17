@@ -90,7 +90,10 @@ function gulpifier_get_whitelist($theme, $type) {
     foreach ($whitelist[$type] as $index => $file) {
       if (FALSE !== strstr($file, ':')) {
         list($module, $path) = explode(':', $file);
-        $whitelist[$type][$index] = drupal_get_path('module', $module) . '/' . $path;
+        if (!$prefix = drupal_get_path('module', $module)) {
+          $prefix = drupal_get_path('theme', $module);
+        }
+        $whitelist[$type][$index] = $prefix . '/' . $path;
       }
     }
   }
@@ -113,7 +116,10 @@ function gulpifier_get_js_blacklist($theme) {
     foreach ($whitelist as $index => $file) {
       if (FALSE !== strstr($file, ':')) {
         list($module, $path) = explode(':', $file);
-        $whitelist[$index] = drupal_get_path('module', $module) . '/' . $path;
+        if (!$prefix = drupal_get_path('module', $module)) {
+          $prefix = drupal_get_path('theme', $module);
+        }
+        $whitelist[$index] = $prefix . '/' . $path;
       }
     }
   }
