@@ -193,7 +193,7 @@ function gulpifier_css_alter(&$css) {
   // them all together anywhere we want, with better aggregation.
   if (theme_get_setting('gulpifier_css_same_group')) {
     foreach ($css as $name => $settings) {
-      $js[$name]['group'] = CSS_DEFAULT;
+      $css[$name]['group'] = CSS_DEFAULT;
     }
   }
 
