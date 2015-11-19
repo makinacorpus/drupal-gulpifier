@@ -111,7 +111,7 @@ function drush_gulpifier_gulpify() {
       drush_print("You need to install globally, run:\n\tnpm install -g gulp");
     }
     drush_print("To install gulp and its plugins, run:\n\tcd $absolute_path && npm install");
-    drush_print("To run gulp, 'run gulp'. To watch files, run 'gulp watch'.");
+    drush_print("To run gulp, enter 'gulp'. To watch files, enter 'gulp watch'.");
     drush_print();
 
 
