@@ -288,7 +288,7 @@ function gulpifier_form_system_theme_settings_alter(&$form, &$form_state) {
     '#default_value' => theme_get_setting('gulpifier_map_path', $theme_name) ?: $theme_path . '/js/map.json',
     '#disabled'      => isset($theme_object->info['settings']['gulpifier_map_path']),
   );
-  $form['#validate'] = array('gulpifier_form_map_path_validate');
+  $form['#validate'][] = 'gulpifier_form_map_path_validate';
   $form['gulpifier']['js']['gulpifier_single_js'] = array(
     '#type'          => 'checkbox',
     '#title'         => t("Enable single JS file (production mode)"),
