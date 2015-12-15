@@ -1,0 +1,19 @@
+{
+    "name": "makinacorpus/drupal-gulpifier",
+    "type": "drupal-module",
+    "description": "Drupal module to ease Gulp frontend development workflow",
+    "keywords": [],
+    "homepage": "http://github.com/makinacorpus/drupal-gulpifier",
+    "license": "GPL-2",
+    "authors": [
+        {
+            "name": "Sébastien Corbin",
+            "email": "sebastien.corbin@makina-corpus.com"
+        },
+        {
+            "name": "Makina Corpus",
+            "homepage": "http://makina-corpus.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
