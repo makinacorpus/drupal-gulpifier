@@ -93,8 +93,8 @@ function gulpifier_get_whitelist($theme, $type) {
         $prefix = null;
         if (module_exists($module)) {
           $prefix = drupal_get_path('module', $module);
-        } else { // Attempt using theme
-          $prefix = drupal_get_path('theme', $module);
+        } else if ($module === $GLOBALS['theme']) {
+          $prefix = path_to_theme();
         }
         if ($prefix) {
           $whitelist[$type][$index] = $prefix . '/' . $path;
