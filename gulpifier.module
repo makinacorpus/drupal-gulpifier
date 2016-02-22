@@ -121,10 +121,15 @@ function gulpifier_get_js_blacklist($theme) {
     foreach ($whitelist as $index => $file) {
       if (FALSE !== strstr($file, ':')) {
         list($module, $path) = explode(':', $file);
-        if (!$prefix = drupal_get_path('module', $module)) {
-          $prefix = drupal_get_path('theme', $module);
+        $prefix = null;
+        if (module_exists($module)) {
+          $prefix = drupal_get_path('module', $module);
+        } else if ($module === $GLOBALS['theme']) {
+          $prefix = path_to_theme();
         }
-        $whitelist[$index] = $prefix . '/' . $path;
+        if ($prefix) {
+          $whitelist[$index] = $prefix . '/' . $path;
+        }
       }
     }
   }
