@@ -30,7 +30,8 @@ function gulpifier_js_alter(&$js) {
 
   // First part of the proces, discover.
   if (theme_get_setting('gulpifier_discover')) {
-    $map_path = theme_get_setting('gulpifier_map_path') ?: $theme_path . '/js/map.json';
+    $map_path = DRUPAL_ROOT . '/';
+    $map_path .= theme_get_setting('gulpifier_map_path') ?: $theme_path . '/js/map.json';
 
     gulpifier_discover_js($js, $map_path, $script_path, $whitelist);
   }
