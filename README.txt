@@ -167,3 +167,10 @@ busting parameter (`?abcdef`) that is added to the assets. It is totally
 optional and gulpifier does not require it at all. But you can learn more here:
   - https://hacks.mozilla.org/2014/02/live-editing-sass-and-less-in-the-firefox-developer-tools/
   - http://code.tutsplus.com/tutorials/working-with-less-and-the-chrome-devtools--net-36636
+
+### Discovery killswitch
+In production, you may want to disable the JS discovery to prevent
+creation/modification of JSON maps, regardless of theme settings. To do so, add
+this line to your `settings.php` file:
+
+  $conf['gulpifier_discovery_killswitch'] = TRUE;

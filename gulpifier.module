@@ -28,8 +28,8 @@ function gulpifier_js_alter(&$js) {
   // Get the bundle script path.
   $script_path = theme_get_setting('gulpifier_js_bundle_path') ?: $theme_path . '/dist/script.min.js';
 
-  // First part of the proces, discover.
-  if (theme_get_setting('gulpifier_discover')) {
+  // First part of the process, discover.
+  if (theme_get_setting('gulpifier_discover') && !variable_get('gulpifier_discovery_killswitch', FALSE)) {
     $map_path = DRUPAL_ROOT . '/';
     $map_path .= theme_get_setting('gulpifier_map_path') ?: $theme_path . '/js/map.json';
 
